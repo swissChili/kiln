@@ -21,6 +21,7 @@ pub struct TableSpec {
     pub data: HashMap<String, Column>
 }
 
+#[derive(Debug)]
 pub struct Table {
     spec: TableSpec,
     name: String,
@@ -115,11 +116,16 @@ impl Db {
             }
             Ok(
                 Table {
-                    spec: tablespec,
+                    spec: self.spec(name),
                     name: name.to_string(),
-                    path: p.to_string(),
+                    path: p.to_str().unwrap().to_string(),
                 }
             )
+        } else {
+            Err(std::io::Error::new(
+                std::io::ErrorKind::PermissionDenied,
+                "DB already exists!"
+            ))
         }
     }
 }
