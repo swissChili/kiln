@@ -5,5 +5,6 @@ authors = ["swissChili"]
 edition = "2018"
 description = "A WIP relational database"
 license = "GPL-3.0"
+readme = "README.md"
 
 [dependencies]

@@ -2,18 +2,26 @@ use std::fs;
 use std::path;
 use std::collections::HashMap;
 use std::vec::Vec;
+use std::io;
 
 pub struct Db {
     path: String,
     tables: Vec<Table>
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Column {
     Str,
     LongStr,
     I32,
     Byte,
+}
+
+pub enum ColumnValue {
+    Str(String),
+    LongStr(String),
+    I32(i32),
+    Byte(String),
 }
 
 #[derive(Debug)]
@@ -26,6 +34,39 @@ pub struct Table {
     spec: TableSpec,
     name: String,
     path: String,
+}
+
+impl Table {
+    pub fn insert(&self, value: HashMap<String, ColumnValue>) -> Result<(), io::Error> {
+        for (k, v) in value {
+            // Panic if the key doesn't exist
+            let t = self.spec.data.get(&k).unwrap();
+            if *t == match v {
+                ColumnValue::Str(_) => Column::Str,
+                ColumnValue::LongStr(_) => Column::LongStr,
+                ColumnValue::I32(_) => Column::I32,
+                ColumnValue::Byte(_) => Column::Byte,
+            } {
+                let id = "test";
+                let p = path::Path::new(&self.path);
+                
+                let f = match v {
+                    ColumnValue::Str(s) => s,
+                    ColumnValue::LongStr(s) => s,
+                    ColumnValue::I32(s) => format!("{}", s),
+                    ColumnValue::Byte(s) => s,
+                };
+            
+                let val = p.join("_data").join(id);
+                fs::create_dir_all(&val)?;
+                fs::write(&val.join(&k), &f)?;
+                let idx = p.join("_index").join(&f);
+                fs::create_dir_all(&idx)?;
+                fs::write(idx.join(id), "")?;
+            }
+        }
+        Ok(())
+    }
 }
 
 #[macro_export]
@@ -112,7 +153,6 @@ impl Db {
                         Column::Str => "str",
                         Column::LongStr => "longstr",
                     })?;
-                fs::create_dir(&idx.join(&name))?;
             }
             Ok(
                 Table {
