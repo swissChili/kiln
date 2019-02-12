@@ -17,6 +17,7 @@ pub enum Column {
     Byte,
 }
 
+#[derive(Debug)]
 pub enum ColumnValue {
     Str(String),
     LongStr(String),
@@ -31,7 +32,7 @@ pub struct TableSpec {
 
 #[derive(Debug)]
 pub struct Table {
-    spec: TableSpec,
+    pub spec: TableSpec,
     name: String,
     path: String,
 }
@@ -66,6 +67,30 @@ impl Table {
             }
         }
         Ok(())
+    }
+
+    pub fn row(&self, id: &str) -> HashMap<String, ColumnValue> {
+        let p = path::Path::new(&self.path);
+        let mut map = HashMap::new();
+        for k in fs::read_dir(p.join("_data").join(id)).unwrap() {
+            let key = k.unwrap();
+            let val = fs::read_to_string(key.path()).unwrap();
+            let strkey = key.file_name()
+                        .to_string_lossy()
+                        .to_string();
+            let val_type = &self.spec.data.get(&strkey).unwrap();
+            map.insert(strkey,
+                match val_type {
+                    Column::Str => ColumnValue::Str(val),
+                    Column::LongStr => ColumnValue::LongStr(val),
+                    Column::Byte => ColumnValue::Byte(val),
+                    Column::I32 => {
+                        let i: i32 = val.parse().expect("Failed to parse file to i32");
+                        ColumnValue::I32(i)
+                    }
+                });
+        }
+        map
     }
 }
 

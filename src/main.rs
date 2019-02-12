@@ -20,5 +20,7 @@ fn main() {
     map.insert("name".to_string(), Str("Bob".to_string()));
 
     users.insert(map);
+    println!("{:?}", users.spec.data);
+    println!("{:?}", users.row("test"));
 
 }
