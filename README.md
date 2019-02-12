@@ -13,3 +13,24 @@ This is a very early version of the database. So far the only thing done is the 
   - IDs are hardcoded. Need to implement some sort of hashing for random IDs.
 - Get row by ID
 - DB structure allows for future O(1) look up of rows by value. (eg: `get!(FROM users WHERE { name: "bob" })`)
+
+## DB structure
+
+This tree represents how the data is stored in the database. The contents of files is shown in parenthesis next to the file name.
+
+```
+data
+└── users
+    ├── _data
+    │   └── 0647277808392464
+    │       ├── age   (12)
+    │       └── name  (Bob)
+    ├── _index
+    │   ├── 12
+    │   │   └── 0647277808392464
+    │   └── Bob
+    │       └── 0647277808392464
+    └── _spec
+        ├── age   (i32)
+        └── name  (i32)
+```
