@@ -8,3 +8,6 @@ license = "GPL-3.0"
 readme = "README.md"
 
 [dependencies]
+syn = "0.14"
+quote = "0.6"
+

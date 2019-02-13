@@ -22,15 +22,17 @@ This tree represents how the data is stored in the database. The contents of fil
 data
 └── users
     ├── _data
-    │   └── 0647277808392464
-    │       ├── age   (12)
-    │       └── name  (Bob)
+    │   └── 000
+    │       ├── age  (12)
+    │       └── name (Bob)
     ├── _index
-    │   ├── 12
-    │   │   └── 0647277808392464
-    │   └── Bob
-    │       └── 0647277808392464
+    │   ├── age
+    │   │   └── 12
+    │   │       └── 000
+    │   └── name
+    │       └── Bob
+    │           └── 000
     └── _spec
-        ├── age   (i32)
-        └── name  (i32)
+        ├── age  (i32)
+        └── name (str)
 ```

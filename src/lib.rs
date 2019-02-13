@@ -4,25 +4,14 @@ use std::collections::HashMap;
 use std::vec::Vec;
 use std::io;
 
+mod column;
+mod traits;
+pub use crate::column::*;
+pub use crate::traits::*;
+
 pub struct Db {
     path: String,
     tables: Vec<Table>
-}
-
-#[derive(Debug, PartialEq)]
-pub enum Column {
-    Str,
-    LongStr,
-    I32,
-    Byte,
-}
-
-#[derive(Debug)]
-pub enum ColumnValue {
-    Str(String),
-    LongStr(String),
-    I32(i32),
-    Byte(String),
 }
 
 #[derive(Debug)]
@@ -36,6 +25,16 @@ pub struct Table {
     name: String,
     path: String,
 }
+
+pub fn stringify_col(v: ColumnValue) -> String {
+    match v {
+        ColumnValue::Str(s) => s,
+        ColumnValue::LongStr(s) => s,
+        ColumnValue::I32(s) => format!("{}", s),
+        ColumnValue::Byte(s) => s,
+    }
+}
+
 
 impl Table {
     pub fn insert(&self, value: HashMap<String, ColumnValue>) -> Result<(), io::Error> {
@@ -51,22 +50,33 @@ impl Table {
                 let id = "test";
                 let p = path::Path::new(&self.path);
                 
-                let f = match v {
-                    ColumnValue::Str(s) => s,
-                    ColumnValue::LongStr(s) => s,
-                    ColumnValue::I32(s) => format!("{}", s),
-                    ColumnValue::Byte(s) => s,
-                };
-            
+                let f = stringify_col(v);
+
                 let val = p.join("_data").join(id);
                 fs::create_dir_all(&val)?;
                 fs::write(&val.join(&k), &f)?;
-                let idx = p.join("_index").join(&f);
+                let idx = p.join("_index").join(&k).join(&f);
                 fs::create_dir_all(&idx)?;
                 fs::write(idx.join(id), "")?;
             }
         }
         Ok(())
+    }
+
+    pub fn get(&self, key: &str, val: ColumnValue) -> Vec<HashMap<String, ColumnValue>> {
+        let p = path::Path::new(&self.path);
+        let matches = p.join("_index").join(key).join(stringify_col(val));
+        println!("Matches: {:?}", matches);
+        let mut rows = Vec::new();
+        for r in fs::read_dir(matches).unwrap() {
+            let row = r.unwrap();
+            let id = row.file_name()
+                        .to_string_lossy()
+                        .to_string();
+
+            rows.push(id);
+        }
+        rows.iter().map(|x| self.row(&x)).collect::<Vec<_>>()
     }
 
     pub fn row(&self, id: &str) -> HashMap<String, ColumnValue> {
@@ -113,6 +123,20 @@ macro_rules! table {
         )*
         kiln::TableSpec{data:v}
     }}
+}
+
+#[macro_export]
+macro_rules! get_where {
+    ( $t:ident { $key:ident : $val:expr } ) => {
+        $t.get(stringify!($key), $val.to_row())
+    }
+}
+
+#[macro_export]
+macro_rules! select {
+    ( $rows:expr => $col:ident ) => {
+        $rows.iter().map(|x| x.get(stringify!($col))).collect::<Vec<_>>()
+    }
 }
 
 impl Db {
@@ -178,6 +202,8 @@ impl Db {
                         Column::Str => "str",
                         Column::LongStr => "longstr",
                     })?;
+                // Create the index dir for the col
+                fs::create_dir(idx.join(&name))?;
             }
             Ok(
                 Table {
