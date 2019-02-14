@@ -14,22 +14,23 @@ fn main() {
         name: str
     };
 
-    println!("{:?}", table);
-    let users = db.create("users", table).unwrap();
+    println!("Creating table: {:?}", table);
+    let users = db.create("users", table).expect("Table exists with different spec");
 
-    let mut map = HashMap::new();
-    map.insert("age".to_string(), 12.to_row());
-    map.insert("name".to_string(), "Bob".to_row());
 
-    users.insert(map);
-    println!("{:?}", users.spec.data);
-    println!("{:?}", users.row("test"));
+    users.insert(row!{
+        name: "Bob",
+        age: 12
+    });
+
+    println!("Spec:     {:?}", users.spec.data);
+    println!("Row test: {:?}", users.row("test"));
 
     let users = get_where!( users { name: "Bob" } );
-    let rows = select!(users => age);
+    let ages = select!(users => age);
 
-    for row in rows {
-        println!("row {:?}", row);
+    for age in ages {
+        println!("User's age: {:?}", age.unwrap());
     }
 
 }

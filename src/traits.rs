@@ -1,11 +1,8 @@
-extern crate proc_macro;
-
-use crate::traits::proc_macro::TokenStream;
-use quote::quote;
-use syn;
-
 use crate::column::*;
 
+/// Wraps the type in a ColumnValue enum. Allows for doing
+/// things like `123.to_row()` instead of `ColumnValue::i32(123)`
+/// All int types are cast to an i32 because it makes the db simpler.
 pub trait ToRow {
     fn to_row(&self) -> ColumnValue;
 }

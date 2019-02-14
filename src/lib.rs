@@ -14,7 +14,7 @@ pub struct Db {
     tables: Vec<Table>
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct TableSpec {
     pub data: HashMap<String, Column>
 }
@@ -26,6 +26,12 @@ pub struct Table {
     path: String,
 }
 
+/// Take a ColumnValue and return a stringified representation of it
+/// eg:
+/// ```rust
+/// println!("{}", stringify_col(12.to_col()));
+/// // 12
+/// ```
 pub fn stringify_col(v: ColumnValue) -> String {
     match v {
         ColumnValue::Str(s) => s,
@@ -37,6 +43,12 @@ pub fn stringify_col(v: ColumnValue) -> String {
 
 
 impl Table {
+    /// Insert a row into a Table. Rows can be constructed as HashMaps
+    /// or using the row! macro as shown bellow:
+    /// ```rust
+    /// users.insert(row!{name: "bob", age: 12});
+    /// ```
+    /// Or manually by creating a HashMap<String, ColumnValue> object
     pub fn insert(&self, value: HashMap<String, ColumnValue>) -> Result<(), io::Error> {
         for (k, v) in value {
             // Panic if the key doesn't exist
@@ -63,10 +75,19 @@ impl Table {
         Ok(())
     }
 
+    /// Gets all rows where a certain key == a certain value.
+    /// For example, in the following table
+    ///
+    /// | age: i32 | name: str |
+    /// 
+    /// To get the names of all users of age n one would do the following
+    /// ```rust
+    /// users.get("age", n.to_col());
+    /// ```
     pub fn get(&self, key: &str, val: ColumnValue) -> Vec<HashMap<String, ColumnValue>> {
         let p = path::Path::new(&self.path);
         let matches = p.join("_index").join(key).join(stringify_col(val));
-        println!("Matches: {:?}", matches);
+        //println!("Matches: {:?}", matches);
         let mut rows = Vec::new();
         for r in fs::read_dir(matches).unwrap() {
             let row = r.unwrap();
@@ -79,6 +100,7 @@ impl Table {
         rows.iter().map(|x| self.row(&x)).collect::<Vec<_>>()
     }
 
+    /// Returns a row from it's ID
     pub fn row(&self, id: &str) -> HashMap<String, ColumnValue> {
         let p = path::Path::new(&self.path);
         let mut map = HashMap::new();
@@ -104,6 +126,10 @@ impl Table {
     }
 }
 
+/// Shorthand for creating a table spec:
+/// ```rust
+/// let users = table!{name: str, age: i32};
+/// ```
 #[macro_export]
 macro_rules! table {
     ( $( $n:ident : $t:ident ),* ) => {{
@@ -125,6 +151,15 @@ macro_rules! table {
     }}
 }
 
+/// A shorthand for getting rows that match a certain criteria.
+/// Abstracts over the `table.get()` method to find all rows in
+/// which a column matches a certain value specified.
+/// ```rust
+/// let users_named_bob = get_where( users { name: "bob" } );
+/// for user in users_named_bob {
+///     println!("{}", user.get("age"));
+/// }
+/// ```
 #[macro_export]
 macro_rules! get_where {
     ( $t:ident { $key:ident : $val:expr } ) => {
@@ -132,6 +167,7 @@ macro_rules! get_where {
     }
 }
 
+/// Select a single column from the rows given. Basically just a map func.
 #[macro_export]
 macro_rules! select {
     ( $rows:expr => $col:ident ) => {
@@ -139,9 +175,22 @@ macro_rules! select {
     }
 }
 
+#[macro_export]
+macro_rules! row {
+    ( $( $key:ident : $val:expr ),* ) => {{
+        extern crate kiln;
+        let mut map: HashMap<String, kiln::ColumnValue> = std::collections::HashMap::new();
+        $(
+            map.insert(stringify!($key).to_string(), $val.to_row());
+        )*
+        map
+    }}
+}
+
 impl Db {
     pub fn new(path: &str) -> Result<Self, std::io::Error> {
-        if path::Path::new(path).exists() {
+        let exists = path::Path::new(path).exists();
+        if exists {
             Ok(Self {
                 path: path.to_string(),
                 tables: Vec::new(),
@@ -155,6 +204,10 @@ impl Db {
         }
     }
 
+    /// Parses a tables specfile (_spec/*) and returns a TableSpec object
+    ///
+    /// TODO: implement macro or function to create a Table object out
+    /// of this spec.
     fn spec(&self, table: &str) -> TableSpec {
         let t = path::Path::new(&self.path).join(table);
         let spec = t.join("_spec");
@@ -180,9 +233,9 @@ impl Db {
         TableSpec{data:v}
     }
 
+    /// Create a new table in the db dir.
     pub fn create(&self, name: &str, tablespec: TableSpec) -> Result<Table, std::io::Error> {
         let p = path::Path::new(&self.path).join(name);
-        println!("{:?}", p.clone().as_path().exists());
         if !&p.as_path().exists() {
             println!("Creating");
             fs::create_dir(p.clone())?;
@@ -213,10 +266,23 @@ impl Db {
                 }
             )
         } else {
-            Err(std::io::Error::new(
-                std::io::ErrorKind::PermissionDenied,
-                "DB already exists!"
-            ))
+            let spec_found = self.spec(name);
+            if spec_found == tablespec {
+                Ok(
+                    Table {
+                        spec: tablespec,
+                        name: name.to_string(),
+                        path: p.to_str().unwrap().to_string(),
+                    }
+                )
+            } else {
+                Err (
+                    std::io::Error::new(
+                        std::io::ErrorKind::PermissionDenied,
+                        "Table of same name exists with different spec"
+                    )
+                )
+            }
         }
     }
 }
