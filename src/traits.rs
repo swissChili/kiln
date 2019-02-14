@@ -43,6 +43,12 @@ impl ToRow for str {
     }
 }
 
+impl ToRow for &str {
+    fn to_row(&self) -> ColumnValue {
+        ColumnValue::Str(self.to_string())
+    }
+}
+
 impl ToRow for String {
     fn to_row(&self) -> ColumnValue {
         ColumnValue::Str(self.to_string())

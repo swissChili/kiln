@@ -1,3 +1,4 @@
+#![feature(uniform_paths)]
 use std::fs;
 use std::path;
 use std::collections::HashMap;
@@ -84,7 +85,9 @@ impl Table {
     /// ```rust
     /// users.get("age", n.to_col());
     /// ```
-    pub fn get(&self, key: &str, val: ColumnValue) -> Vec<HashMap<String, ColumnValue>> {
+    pub fn get<T: ToRow>(&self, key: &str, v: T) -> Vec<HashMap<String, ColumnValue>> {
+        let val = v.to_row();
+    
         let p = path::Path::new(&self.path);
         let matches = p.join("_index").join(key).join(stringify_col(val));
         //println!("Matches: {:?}", matches);
@@ -179,7 +182,8 @@ macro_rules! select {
 macro_rules! row {
     ( $( $key:ident : $val:expr ),* ) => {{
         extern crate kiln;
-        let mut map: HashMap<String, kiln::ColumnValue> = std::collections::HashMap::new();
+        use kiln::ToRow;
+        let mut map = std::collections::HashMap::new();
         $(
             map.insert(stringify!($key).to_string(), $val.to_row());
         )*
@@ -233,8 +237,8 @@ impl Db {
         TableSpec{data:v}
     }
 
-    /// Create a new table in the db dir.
-    pub fn create(&self, name: &str, tablespec: TableSpec) -> Result<Table, std::io::Error> {
+    /// Create or access a table by name and spec
+    pub fn table(&self, name: &str, tablespec: TableSpec) -> Result<Table, std::io::Error> {
         let p = path::Path::new(&self.path).join(name);
         if !&p.as_path().exists() {
             println!("Creating");
