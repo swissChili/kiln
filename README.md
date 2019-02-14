@@ -1,4 +1,7 @@
-# Kiln ![crates.io](https://img.shields.io/crates/v/kiln.svg?style=for-the-badge)
+# Kiln 
+
+[crates.io](![](https://img.shields.io/crates/v/kiln.svg?style=for-the-badge))
+[docs.rs](https://docs.rs/crate/kiln/)
 
 Kiln is a relational database implemented in Rust. Unlike databases like PostgreSQL and SQLite, Kiln does not operate on a client-server model. Instead, it is a stand-alone library that allows it to be used with zero runtime dependencies. 
 
