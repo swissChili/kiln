@@ -27,6 +27,9 @@ This is a very early version of the database. So far the only thing done is the 
 Here is a simple example of working with one simple table. The structure of the queries is very different from how it would be accomplished in a tradition SQL database. This unique structure makes it possible to easily interact with the database using expressive, declarative Rust code.
 
 ```rust
+#[macro_use]
+extern crate kiln;
+
 fn main() {
     // Create a new database in the `data` dir
     let db = kiln::Db::new("data").expect("Failed to create or access db");
@@ -43,14 +46,22 @@ fn main() {
         age: 24
     }).expect("Could not insert row");
 
-    // Get back a row where the name = "Bob"
-    let people = users.get("name", "Bob");
+    users.insert(row!{
+        name: "Jeff",
+        age: 24
+    }).expect("Failed to insert again");
 
-    // Select just the ages from these rows
-    for person in people {
-        // Age is an Option because all columns can be empty
-        println!("Bob is {} years old", person["age"].i32().unwrap());
-        //=> Bob is I32(24) years old
+    // Get back a row where the name = "Bob"
+    let user = users.get_one("name", "Bob").unwrap();
+
+    println!("Bob is {} years old", user["age"].i32().unwrap());
+    //=> Bob is 24 years old
+
+    for user in users.get("age", 24) {
+        println!("24 year old named {}", user["name"].string().unwrap())
     }
+    //=> 24 year old named Jeff
+    //=> 24 year old named Bob
 }
+
 ```

@@ -23,7 +23,7 @@ impl ColumnValue {
         }
     }
 
-    pub fn string<'a>(&self) -> Option<String> {
+    pub fn string(&self) -> Option<String> {
         use ColumnValue::*;
         match self {
             Str(i) => Some(i.to_string()),

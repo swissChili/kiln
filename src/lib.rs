@@ -1,4 +1,7 @@
 #![feature(uniform_paths)]
+extern crate uuid;
+
+use uuid::Uuid;
 use std::fs;
 use std::path;
 use std::collections::HashMap;
@@ -53,6 +56,7 @@ impl Table {
     /// ```
     /// Or manually by creating a HashMap<String, ColumnValue> object
     pub fn insert(&self, value: HashMap<String, ColumnValue>) -> Result<(), io::Error> {
+        let id = &Uuid::new_v4().to_hyphenated().to_string();
         for (k, v) in value {
             // Panic if the key doesn't exist
             let t = self.spec.data.get(&k).unwrap();
@@ -62,7 +66,6 @@ impl Table {
                 ColumnValue::I32(_) => Column::I32,
                 ColumnValue::Byte(_) => Column::Byte,
             } {
-                let id = "test";
                 let p = path::Path::new(&self.path);
                 
                 let f = stringify_col(v);
@@ -89,11 +92,12 @@ impl Table {
     /// ```
     pub fn get<T: ToRow>(&self, key: &str, v: T) -> Vec<Row> {
         let val = v.to_row();
-    
+
         let p = path::Path::new(&self.path);
         let matches = p.join("_index").join(key).join(stringify_col(val));
         //println!("Matches: {:?}", matches);
         let mut rows = Vec::new();
+
         for r in fs::read_dir(matches).unwrap() {
             let row = r.unwrap();
             let id = row.file_name()
@@ -103,6 +107,21 @@ impl Table {
             rows.push(id);
         }
         rows.iter().map(|x| self.row(&x)).collect::<Vec<_>>()
+    }
+
+    pub fn get_one<T: ToRow>(&self, key: &str, v: T) -> Option<Row> {
+        let p = path::Path::new(&self.path);
+        let matches = p.join("_index").join(key).join(stringify_col(v.to_row()));
+
+        for r in fs::read_dir(matches).unwrap() {
+            let row = r.unwrap();
+            let id = row.file_name()
+                        .to_string_lossy()
+                        .to_string();
+
+            return Some(self.row(&id));
+        }
+        None
     }
 
     /// Returns a row from it's ID

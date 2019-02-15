@@ -1,6 +1,6 @@
 [package]
 name = "kiln"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["swissChili"]
 edition = "2018"
 description = "A WIP relational database"
@@ -8,3 +8,4 @@ license = "GPL-3.0"
 readme = "README.md"
 
 [dependencies]
+uuid = { version = "0.7", features = ["v4"] }

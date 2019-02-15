@@ -17,13 +17,20 @@ fn main() {
         age: 24
     }).expect("Could not insert row");
 
-    // Get back a row where the name = "Bob"
-    let users = users.get("name", "Bob");
+    users.insert(row!{
+        name: "Jeff",
+        age: 24
+    }).expect("Failed to insert");
 
-    // Select just the ages from these rows
-    for user in users {
-        // Age is an Option because all columns can be empty
-        println!("Bob is {} years old", user["age"].i32().unwrap());
-        //=> Bob is I32(24) years old
+    // Get back a row where the name = "Bob"
+    let user = users.get_one("name", "Bob").unwrap();
+
+    println!("Bob is {} years old", user["age"].i32().unwrap());
+    //=> Bob is 24 years old
+
+    for user in users.get("age", 24) {
+        println!("24 year old named {}", user["name"].string().unwrap())
     }
+    //=> 24 year old named Jeff
+    //=> 24 year old named Bob
 }
