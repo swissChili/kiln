@@ -4,23 +4,25 @@ use std::path;
 use std::collections::HashMap;
 use std::vec::Vec;
 use std::io;
+use std::boxed::Box;
 
 mod column;
 mod traits;
+mod row;
 pub use crate::column::*;
 pub use crate::traits::*;
+pub use crate::row::*;
 
 pub struct Db {
-    path: String,
-    tables: Vec<Table>
+    path: String
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct TableSpec {
     pub data: HashMap<String, Column>
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Table {
     pub spec: TableSpec,
     name: String,
@@ -85,7 +87,7 @@ impl Table {
     /// ```rust
     /// users.get("age", n.to_col());
     /// ```
-    pub fn get<T: ToRow>(&self, key: &str, v: T) -> Vec<HashMap<String, ColumnValue>> {
+    pub fn get<T: ToRow>(&self, key: &str, v: T) -> Vec<Row> {
         let val = v.to_row();
     
         let p = path::Path::new(&self.path);
@@ -104,7 +106,7 @@ impl Table {
     }
 
     /// Returns a row from it's ID
-    pub fn row(&self, id: &str) -> HashMap<String, ColumnValue> {
+    pub fn row(&self, id: &str) -> Row {
         let p = path::Path::new(&self.path);
         let mut map = HashMap::new();
         for k in fs::read_dir(p.join("_data").join(id)).unwrap() {
@@ -125,7 +127,7 @@ impl Table {
                     }
                 });
         }
-        map
+        Row::from_map(self, map)
     }
 }
 
@@ -196,14 +198,12 @@ impl Db {
         let exists = path::Path::new(path).exists();
         if exists {
             Ok(Self {
-                path: path.to_string(),
-                tables: Vec::new(),
+                path: path.to_string()
             })
         } else {
             fs::create_dir(path)?;
             Ok(Self {
-                path: path.to_string(),
-                tables: Vec::new(),
+                path: path.to_string()
             })
         }
     }

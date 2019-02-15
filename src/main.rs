@@ -21,9 +21,9 @@ fn main() {
     let users = users.get("name", "Bob");
 
     // Select just the ages from these rows
-    for age in select!(users => age) {
+    for user in users {
         // Age is an Option because all columns can be empty
-        println!("Bob is {:?} years old", age.unwrap());
+        println!("Bob is {} years old", user["age"].i32().unwrap());
         //=> Bob is I32(24) years old
     }
 }
