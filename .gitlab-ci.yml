@@ -6,8 +6,6 @@ pages:
   artifacts:
     paths:
     - public
-    only:
-    - master
 
 test:
   image: rust:1-stretch
