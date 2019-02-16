@@ -12,7 +12,6 @@ test:
   script:
   - rustup override set nightly
   - cargo run
-  - cargo test
   artifacts:
     paths:
     - target
