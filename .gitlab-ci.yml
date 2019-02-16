@@ -1,0 +1,16 @@
+pages:
+  image: hrektts/mdbook
+  script:
+  - mdbook build book
+  - mv book/book public
+  artifacts:
+    paths:
+    - public
+    only:
+    - master
+
+test:
+  image: rust:1-stretch
+  script:
+  - cargo run
+  - cargo test

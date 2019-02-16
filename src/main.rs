@@ -29,7 +29,7 @@ fn main() {
     //=> Bob is 24 years old
 
     for user in users.get("age", 24) {
-        println!("24 year old named {}", user["name"].string().unwrap())
+        println!("24 year old named {}", user["name"].string().unwrap());
     }
     //=> 24 year old named Jeff
     //=> 24 year old named Bob

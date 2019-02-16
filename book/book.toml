@@ -1,0 +1,6 @@
+[book]
+authors = ["swissChili"]
+multilingual = false
+src = "src"
+title = "Kiln"
+curly-quotes = true

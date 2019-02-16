@@ -7,6 +7,8 @@ Kiln is a relational database implemented in Rust. Unlike databases like Postgre
 
 This is a very early version of the database. So far the only thing done is the format the database stores tables.
 
+A high level [guide](https://swisschili.gitlab.io/kiln) is available that provides an introduction to Kiln.
+
 ## Features implemented so far
 
 - Creating databases

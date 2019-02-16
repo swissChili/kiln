@@ -55,7 +55,7 @@ impl Table {
     /// users.insert(row!{name: "bob", age: 12});
     /// ```
     /// Or manually by creating a HashMap<String, ColumnValue> object
-    pub fn insert(&self, value: HashMap<String, ColumnValue>) -> Result<(), io::Error> {
+    pub fn insert(&self, value: HashMap<String, ColumnValue>) -> Result<String, io::Error> {
         let id = &Uuid::new_v4().to_hyphenated().to_string();
         for (k, v) in value {
             // Panic if the key doesn't exist
@@ -78,7 +78,7 @@ impl Table {
                 fs::write(idx.join(id), "")?;
             }
         }
-        Ok(())
+        Ok(id.to_string())
     }
 
     /// Gets all rows where a certain key == a certain value.
@@ -90,8 +90,8 @@ impl Table {
     /// ```rust
     /// users.get("age", n.to_col());
     /// ```
-    pub fn get<T: ToRow>(&self, key: &str, v: T) -> Vec<Row> {
-        let val = v.to_row();
+    pub fn get<T: ToCell>(&self, key: &str, v: T) -> Vec<Row> {
+        let val = v.to_cell();
 
         let p = path::Path::new(&self.path);
         let matches = p.join("_index").join(key).join(stringify_col(val));
@@ -109,9 +109,9 @@ impl Table {
         rows.iter().map(|x| self.row(&x)).collect::<Vec<_>>()
     }
 
-    pub fn get_one<T: ToRow>(&self, key: &str, v: T) -> Option<Row> {
+    pub fn get_one<T: ToCell>(&self, key: &str, v: T) -> Option<Row> {
         let p = path::Path::new(&self.path);
-        let matches = p.join("_index").join(key).join(stringify_col(v.to_row()));
+        let matches = p.join("_index").join(key).join(stringify_col(v.to_cell()));
 
         for r in fs::read_dir(matches).unwrap() {
             let row = r.unwrap();
@@ -175,22 +175,6 @@ macro_rules! table {
     }}
 }
 
-/// A shorthand for getting rows that match a certain criteria.
-/// Abstracts over the `table.get()` method to find all rows in
-/// which a column matches a certain value specified.
-/// ```rust
-/// let users_named_bob = get_where( users { name: "bob" } );
-/// for user in users_named_bob {
-///     println!("{}", user.get("age"));
-/// }
-/// ```
-#[macro_export]
-macro_rules! get_where {
-    ( $t:ident { $key:ident : $val:expr } ) => {
-        $t.get(stringify!($key), $val.to_row())
-    }
-}
-
 /// Select a single column from the rows given. Basically just a map func.
 #[macro_export]
 macro_rules! select {
@@ -199,20 +183,33 @@ macro_rules! select {
     }
 }
 
+/// Creates a new Row object from an abstract HashMap-like representation
+/// ```rs
+/// users.insert(row!{
+///     name: "richard",
+///     age: 83
+/// });
+/// ```
 #[macro_export]
 macro_rules! row {
     ( $( $key:ident : $val:expr ),* ) => {{
         extern crate kiln;
-        use kiln::ToRow;
+        use kiln::ToCell;
         let mut map = std::collections::HashMap::new();
         $(
-            map.insert(stringify!($key).to_string(), $val.to_row());
+            map.insert(stringify!($key).to_string(), $val.to_cell());
         )*
         map
     }}
 }
 
 impl Db {
+    /// Create or connect to an existing database in the directory
+    /// provided. If one exists, it will return a Db object in that
+    /// directory, however it will not verify the integrity of the
+    /// tables at creation. These are only verified when calling
+    /// `db.table(name, spec)` which verifies that the spec of the
+    /// table of that name matches that which is provided.
     pub fn new(path: &str) -> Result<Self, std::io::Error> {
         let exists = path::Path::new(path).exists();
         if exists {
@@ -228,9 +225,6 @@ impl Db {
     }
 
     /// Parses a tables specfile (_spec/*) and returns a TableSpec object
-    ///
-    /// TODO: implement macro or function to create a Table object out
-    /// of this spec.
     fn spec(&self, table: &str) -> TableSpec {
         let t = path::Path::new(&self.path).join(table);
         let spec = t.join("_spec");
@@ -256,7 +250,12 @@ impl Db {
         TableSpec{data:v}
     }
 
-    /// Create or access a table by name and spec
+    /// Create or access a table by name and spec. Verifies
+    /// that if the table exists, it matches the spec given.
+    /// This will return an Err if the table spec can not be
+    /// parsed. It is important to handle this error as it
+    /// will lead to errors inserting data later on in the
+    /// tables usage.
     pub fn table(&self, name: &str, tablespec: TableSpec) -> Result<Table, std::io::Error> {
         let p = path::Path::new(&self.path).join(name);
         if !&p.as_path().exists() {

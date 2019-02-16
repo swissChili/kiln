@@ -3,3 +3,5 @@
 data
 db
 *.db
+book/book
+public
