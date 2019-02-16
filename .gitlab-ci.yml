@@ -10,5 +10,9 @@ pages:
 test:
   image: rust:1-stretch
   script:
+  - rustup override set nightly
   - cargo run
   - cargo test
+  artifacts:
+    paths:
+    - target
