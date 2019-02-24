@@ -9,5 +9,5 @@ jobs:
 
       - run:
           name: Build Project
-          command: cargo build --release
+          command: rustup override set nightly; cargo build --release
 
