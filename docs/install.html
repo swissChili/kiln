@@ -1,0 +1,234 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Basics - Kiln</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body class="light">
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">var path_to_root = "";</script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { } 
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <ol class="chapter"><li><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li><a href="install.html" class="active"><strong aria-hidden="true">1.1.</strong> Basics</a></li></ol></li></ol>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light <span class="default">(default)</span></button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            
+                        </div>
+
+                        <h1 class="menu-title">Kiln</h1> 
+
+                        <div class="right-buttons">
+                            <a href="print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <a class="header" href="#basic-usage" id="basic-usage"><h1>Basic Usage</h1></a>
+<p>To use the crate simply add this line to your project's <code>dependencies</code> section in your <code>cargo.toml</code>:</p>
+<pre><code class="language-toml">kiln = &quot;0.1&quot;
+</code></pre>
+<p>From there include the crate in your code like you would any other. Kiln has several useful macros so using the <code>#[macro_use]</code> attribute is suggested.</p>
+<p>Before actually doing anything with Kiln it is important to have at least a surface level understanding of what sets it apart from other databases. Kiln operates as a single library, requiring no other dependencies at runtime.</p>
+<p>Because of this, Kiln stores all of the database files in a directory, which houses everything kiln needs to function. Very little of the data is actually loaded into memory at a single time, which greatly simplifies the internal representation of the data.</p>
+<p>Creating or opening a database is as simple as specifying the directory in which it resides, as is shown bellow:</p>
+<pre><code class="language-rs">#[macro_use]
+extern crate kiln;
+
+fn main() {
+    let db = kiln::Db::new(&quot;data&quot;).unwrap();
+}
+</code></pre>
+<p>This will create the <code>data</code> directory if it does not exist, and create all the necessary files for it to function.</p>
+<p>A database is made up of tables. Tables are type-safe constructs that store certain data, organized into rows and columns. Each column has a fixed type that all items in that column must conform to. Kiln provides a <code>table!</code> macro that eases creation of such tables.</p>
+<pre><code class="language-rs">let db = kiln::Db::new(&quot;data&quot;).unwrap();
+
+let users = db.table(&quot;users&quot;, table!{
+    name: str,
+    age: i32,
+    favorite_food: str
+}).unwrap();
+</code></pre>
+<p>This will either create a table called &quot;users&quot; if it does not exist, or open it if it already exists with the same column types. If a table exists with different types, the function will return an Err variant. Such errors are unlikely to occur in a controlled environment unless someone is manually tampering with the DB files (in which case Kiln can not be expected to function correctly), but if they do occur, it is important to handle them immediately as they will almost surely lead to dangerous silent deaths later on if left unhandled.</p>
+<p>Now that a table exists it is necessary to populate it with some data. Tables are made up of rows, each of which can be represented as a set of key-value pairs. Each key being the column, and each value being the content of the coresponding cell. A row can be constructed easily using the <code>row!</code> macro, which provides an abstraction layer over the HashMap used to represent a row's contents. The table macro itself is not aware of the types of each column, and as such, no type checking is done on the creation of a row. Type checking is handled once the row is inserted into a table.</p>
+<pre><code class="language-rs">let row = users.insert(row!{
+    name: &quot;Bob&quot;,
+    age: 64,
+    favorite_food: &quot;Gas station brand lasagna&quot;
+}).unwrap();
+</code></pre>
+<p>This will insert a new row into the <code>users</code> table. This row has a uuid which can be used to select that row. The <code>insert</code> method returns that uuid as a String. A row can be selected by uuid using the <code>row</code> method.</p>
+<pre><code class="language-rs">let name = users.row(row)[&quot;name&quot;].string().unwrap();
+</code></pre>
+<p>This is the simplest query possible. It gets a row by it's uuid, and selects the name which it specifies should be of type string. If all goes well, the name should be <code>&quot;Bob&quot;</code>, same as what was inserted into the db.</p>
+<p>This isn't particularly useful though. To be remotely useful, a db must be able to query rows not only by their uuids, but also by a value. This is trivial in Kiln, as it should be in any database. The following example will query the database for all 64-year olds and print their names. The order the rows are returned can not be assumed to be consistant between queries.</p>
+<pre><code class="language-rs">for user in users.get(&quot;age&quot;, 64) {
+    println!(&quot;64 year old named {}&quot;, user[&quot;name&quot;].string().unwrap());
+}
+</code></pre>
+<p>This should print the expected <code>64 year old named Bob</code>. Remember that each time the code is run, another row is inserted into the table, so if you run it 10 times you will have 10 64 year olds named Bob.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="intro.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a href="intro.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>
