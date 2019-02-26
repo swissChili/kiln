@@ -146,7 +146,29 @@ impl Table {
                     }
                 });
         }
-        Row::from_map(self, map)
+        Row::new(self, map, id.to_string())
+    }
+
+    /// Set a cell to a value. Takes the row, column, value, and old
+    /// value as arguments and panics if it fails. It is not recommended
+    /// to use this function, you should use the row.set(k, v) function
+    /// instead.
+    pub fn set_cell<T: ToCell>(&self,
+            row: String, 
+            col: String,
+            val: T,
+            old_val: ColumnValue) {
+
+        let p = path::Path::new(&self.path);
+        let idx = p.join("_index");
+        let data = p.join("_data");
+        let stringified = stringify_col(val.to_cell());
+        let index_dir = idx.join(&col).join(&stringified);
+
+        fs::create_dir_all(&index_dir).unwrap();
+        fs::write(&index_dir.join(&row), "").unwrap();
+        fs::write(data.join(&row).join(&col), &stringified).unwrap();
+        fs::remove_file(&idx.join(&col).join(stringify_col(old_val)).join(row)).unwrap();
     }
 }
 

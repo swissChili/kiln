@@ -23,10 +23,14 @@ fn main() {
     }).expect("Failed to insert");
 
     // Get back a row where the name = "Bob"
-    let user = users.get_one("name", "Bob").unwrap();
+    let mut user = users.get_one("name", "Bob").unwrap();
 
     println!("Bob is {} years old", user["age"].i32().unwrap());
     //=> Bob is 24 years old
+
+    user.set("age", 42);
+
+    println!("Bob is now {} years old", user["age"].i32().unwrap());
 
     for user in users.get("age", 24) {
         println!("24 year old named {}", user["name"].string().unwrap());
