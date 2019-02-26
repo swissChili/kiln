@@ -1,4 +1,4 @@
-# Kiln 
+# Kiln v0.2
 
 [![](https://img.shields.io/crates/v/kiln.svg?style=for-the-badge)](https://crates.io/crates/kiln)
 [![](https://img.shields.io/badge/-docs.rs-blue.svg?style=for-the-badge)](https://docs.rs/crate/kiln/)
@@ -18,12 +18,14 @@ A high level [guide](https://swisschili.gitlab.io/kiln) is available that provid
     - By row ID
     - By value (eg: find all rows where foo = bar)
   - Parse specfiles for type safe columns
+- Accessing rows
+  - Getting columns from rows
+  - Setting columns in rows
 
 ## Roadmap
 
-- Implement a `Row` type to allow for abstractions like `foo["bar"] = "baz"`
-- Implement a `Rows` type that will abstract over the current `Vec<HashMap<String, Columnval>>`
 - Implement O(1) joining (Easier said than done)
+- Make this all thread-safe with async support (futures maybe?)
 
 ## Usage
 
@@ -44,7 +46,7 @@ fn main() {
     }).expect("Table with same name exists with different spec");
 
     // Insert a row into the users table
-    users.insert(row!{
+    let mut bob = users.insert(row!{
         name: "Bob",
         age: 24
     }).expect("Could not insert row");
@@ -52,19 +54,18 @@ fn main() {
     users.insert(row!{
         name: "Jeff",
         age: 24
-    }).expect("Failed to insert again");
+    }).expect("Failed to insert");
 
-    // Get back a row where the name = "Bob"
-    let user = users.get_one("name", "Bob").unwrap();
-
-    println!("Bob is {} years old", user["age"].i32().unwrap());
+    println!("Bob is {} years old", bob["age"].i32().unwrap());
     //=> Bob is 24 years old
 
+    bob.set("age", 42);
+
+    println!("Bob is now {} years old", bob["age"].i32().unwrap());
+
     for user in users.get("age", 24) {
-        println!("24 year old named {}", user["name"].string().unwrap())
+        println!("24 year old named {}", user["name"].string().unwrap());
     }
     //=> 24 year old named Jeff
-    //=> 24 year old named Bob
 }
-
 ```

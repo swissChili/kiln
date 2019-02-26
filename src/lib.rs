@@ -55,9 +55,9 @@ impl Table {
     /// users.insert(row!{name: "bob", age: 12});
     /// ```
     /// Or manually by creating a HashMap<String, ColumnValue> object
-    pub fn insert(&self, value: HashMap<String, ColumnValue>) -> Result<String, io::Error> {
+    pub fn insert(&self, value: HashMap<String, ColumnValue>) -> Result<Row, io::Error> {
         let id = &Uuid::new_v4().to_hyphenated().to_string();
-        for (k, v) in value {
+        for (k, v) in value.clone() {
             // Panic if the key doesn't exist
             let t = self.spec.data.get(&k).unwrap();
             if *t == match v {
@@ -78,7 +78,7 @@ impl Table {
                 fs::write(idx.join(id), "")?;
             }
         }
-        Ok(id.to_string())
+        Ok(Row::new(self, value, id.to_string()))
     }
 
     /// Gets all rows where a certain key == a certain value.

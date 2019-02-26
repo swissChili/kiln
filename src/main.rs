@@ -12,7 +12,7 @@ fn main() {
     }).expect("Table with same name exists with different spec");
 
     // Insert a row into the users table
-    users.insert(row!{
+    let mut user = users.insert(row!{
         name: "Bob",
         age: 24
     }).expect("Could not insert row");
@@ -21,9 +21,6 @@ fn main() {
         name: "Jeff",
         age: 24
     }).expect("Failed to insert");
-
-    // Get back a row where the name = "Bob"
-    let mut user = users.get_one("name", "Bob").unwrap();
 
     println!("Bob is {} years old", user["age"].i32().unwrap());
     //=> Bob is 24 years old
