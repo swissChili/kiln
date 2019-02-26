@@ -1,6 +1,6 @@
 [package]
 name = "kiln"
-version = "0.2"
+version = "0.2.0"
 authors = ["swissChili"]
 edition = "2018"
 description = "A library-only relational database"
